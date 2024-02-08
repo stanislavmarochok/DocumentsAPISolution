@@ -33,7 +33,7 @@ namespace DocumentsAPI.Formatters
                             Value = pi.GetValue(item, null) switch
                             {
                                 List<string> list => $"[{string.Join(", ", list.Select(x => $"\"{x}\""))}]",
-                                Dictionary<string, string> dictionary => $"[{string.Join(", ", dictionary.Select(pair => $"\"{pair.Key}\":\"{pair.Value}\""))}]",
+                                Dictionary<string, string> dictionary => $"{{{string.Join(", ", dictionary.Select(pair => $"\"{pair.Key}\":\"{pair.Value}\""))}}}",
                                 _ => pi.GetValue(item, null)?.ToString()
                             }
                         }
