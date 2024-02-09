@@ -1,6 +1,5 @@
 ﻿using DocumentsAPI.Models;
-using DocumentsAPI.Services;
-using Microsoft.AspNetCore.Http;
+using DocumentsAPI.UseCases.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DocumentsAPI.Controllers
@@ -9,53 +8,37 @@ namespace DocumentsAPI.Controllers
     [ApiController]
     public class DocumentsController : ControllerBase
     {
-        private readonly IDocumentService _documentService;
+        private readonly IGetAllDocuments getAllDocuments;
+        private readonly IGetDocumentById getDocumentById;
+        private readonly ICreateDocument createDocument;
+        private readonly IUpdateDocument updateDocument;
+        private readonly IDeleteDocument deleteDocument;
 
-        public DocumentsController(IDocumentService documentService)
+        public DocumentsController(
+            IGetAllDocuments getAllDocuments,
+            IGetDocumentById getDocumentById,
+            ICreateDocument createDocument,
+            IUpdateDocument updateDocument,
+            IDeleteDocument deleteDocument)
         {
-            _documentService = documentService;
+            this.getAllDocuments = getAllDocuments;
+            this.getDocumentById = getDocumentById;
+            this.createDocument = createDocument;
+            this.updateDocument = updateDocument;
+            this.deleteDocument = deleteDocument;
         }
 
         [HttpGet("")]
         public async Task<IActionResult> GetDocuments()
         {
-            var documents = new List<Document>
-            {
-                new Document
-                {
-                    Id = Guid.NewGuid(),
-                    ActualData = new Dictionary<string, string>
-                    {
-                        {"key1", "data1" },
-                        {"key2", "data2" },
-                    },
-                    Name = "test name",
-                    Tags = new List<string>
-                    {
-                        "tag 1",
-                        "tag 34"
-                    }
-                },
-                new Document
-                {
-                    Id = Guid.NewGuid(),
-                    ActualData = "test data 3333",
-                    Name = "test name 45454",
-                    Tags = new List<string>
-                    {
-                        "tag 345",
-                        "jklj"
-                    }
-                }
-            };
-
+            var documents = await getAllDocuments.HandleAsync().ToListAsync();
             return Ok(documents);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDocument(Guid id)
         {
-            var document = await _documentService.GetByIdAsync(id);
+            var document = await getDocumentById.HandleAsync(id);
             if (document == null)
                 return NotFound();
 
@@ -65,23 +48,32 @@ namespace DocumentsAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateDocument([FromBody] Document document)
         {
-            var createdDocument = await _documentService.CreateAsync(document);
+            var createdDocument = await createDocument.HandleAsync(document);
             return CreatedAtAction(nameof(GetDocument), new { id = createdDocument.Id }, createdDocument);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDocument(Guid id, [FromBody] Document updatedDocument)
         {
-            var document = await _documentService.GetByIdAsync(id);
+            var document = await getDocumentById.HandleAsync(id);
             if (document == null)
             {
                 return NotFound();
             }
 
-            await _documentService.UpdateAsync(id, updatedDocument);
-            return NoContent();
+            var result = await updateDocument.HandleAsync(id, updatedDocument);
+            return Ok(result);
         }
 
-        // PUT and other methods can be added here following the same pattern
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDocument(Guid id)
+        {
+            var result = await deleteDocument.HandleAsync(id);
+
+            if (result == null)
+                return NotFound("Document was not found");
+
+            return Ok(result);
+        }
     }
 }

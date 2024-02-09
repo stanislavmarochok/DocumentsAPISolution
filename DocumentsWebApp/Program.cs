@@ -1,7 +1,8 @@
 using DocumentsAPI.Formatters;
 using DocumentsAPI.Services;
 using DocumentsAPI.Services.Providers;
-using MessagePack.AspNetCoreMvcFormatter;
+using DocumentsAPI.UseCases;
+using DocumentsAPI.UseCases.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,15 +11,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
 {
     options.RespectBrowserAcceptHeader = true;
-    options.OutputFormatters.Add(new MessagePackOutputFormatter());
     options.OutputFormatters.Add(new TextCsvOutputFormatter());
-    options.FormatterMappings.SetMediaTypeMappingForFormat("mp", "application/x-msgpack");
 })
 .AddXmlSerializerFormatters();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IGetAllDocuments, GetAllDocuments>();
+builder.Services.AddScoped<IGetDocumentById, GetDocumentById>();
+builder.Services.AddScoped<ICreateDocument, CreateDocument>();
+builder.Services.AddScoped<IUpdateDocument, UpdateDocument>();
+builder.Services.AddScoped<IDeleteDocument, DeleteDocument>();
 
 builder.Services.AddScoped<InMemoryStorageProvider>();
 builder.Services.AddScoped<IStorageProvider, InMemoryStorageProvider>(s => s.GetService<InMemoryStorageProvider>());
