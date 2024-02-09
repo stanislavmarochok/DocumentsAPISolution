@@ -16,10 +16,6 @@ namespace DocumentsAPI.Models
         [JsonIgnore]
         public object ActualData { get; set; }
 
-        public string Data
-        {
-            get => JsonConvert.SerializeObject(ActualData);
-            set => ActualData = JsonConvert.DeserializeObject(value);
-        }
+        public string Data => JsonConvert.SerializeObject(ActualData);
     }
 }
