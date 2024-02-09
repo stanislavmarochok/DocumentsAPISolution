@@ -24,7 +24,7 @@ namespace DocumentsAPI.Controllers
                 new Document
                 {
                     Id = Guid.NewGuid(),
-                    Data = new Dictionary<string, string>
+                    ActualData = new Dictionary<string, string>
                     {
                         {"key1", "data1" },
                         {"key2", "data2" },
@@ -39,7 +39,7 @@ namespace DocumentsAPI.Controllers
                 new Document
                 {
                     Id = Guid.NewGuid(),
-                    Data = "test data 3333",
+                    ActualData = "test data 3333",
                     Name = "test name 45454",
                     Tags = new List<string>
                     {
